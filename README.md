@@ -8,19 +8,16 @@ API Boilerplate: Express + MongoDB + Auth0 Authentication
 1. NodeJS v.10.14.2
 2. MongoDB v.4.x
 
-## Install 
+## Installation
 
-1. Install `package.json` dependencies
-
-`$npm install`
-
-2. Install NodeJS
-3. Install/Prepare MongoDB
+1. Install `package.json` dependencies `$npm install`
+2. Install NodeJS https://nodejs.org/en/download/
+3. Install/Prepare MongoDB https://www.mongodb.com/
 
 
-##Config
+## Config
 
-###Environment
+### Environment
 
 1. Create config file `./config/env/.env`
 2. Copy variables from `./config/env/.env_example`
