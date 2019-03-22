@@ -1,11 +1,12 @@
 const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
-const { AuthService, UserService } = require(`${basePath}/app/services`);
 const { Forbidden, NotAuthorized } = require(`${basePath}/app/utils/apiErrors`);
 const config = require(`${basePath}/config/app`);
 
-const userRoles = UserService.getRoles();
+const serviceContainerManager = require('../../../../utils/serviceContainerManager');
+const { userService, AuthService } = serviceContainerManager.load(['userService', 'AuthService']);
 
+const userRoles = userService.getRoles();
 
 module.exports = {
 
@@ -47,7 +48,7 @@ module.exports = {
 
 
 const loadUser = async (remoteId) => {
-  const userFound = await UserService.findByRemoteId(remoteId);
+  const userFound = await userService.findByRemoteId(remoteId);
   if (!(userFound && Object.keys(userFound))) {
     throw new NotAuthorized('');
   }

@@ -1,4 +1,3 @@
-const MainService = require('./MainService');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
@@ -6,15 +5,15 @@ const configDefault = {
   saltRounds: 10,
 };
 
-module.exports = class Crypto extends MainService {
+module.exports = class Crypto {
   constructor(config) {
-    super('Crypto Service');
-    this.config = config || configDefault;
-    this.encoder = bcrypt;
+    this._config = config || configDefault;
+    this._encoder = bcrypt;
+    this._crypto = crypto;
   }
 
-  static getRandomString(bytes) {
-    return crypto.randomBytes(bytes).toString('hex');
+  getRandomString(bytes) {
+    return this._crypto.randomBytes(bytes).toString('hex');
   }
 
   async encode(inputString) {
@@ -22,10 +21,10 @@ module.exports = class Crypto extends MainService {
       throw ((`${this.name}: string to encode is not provided`).toString());
     }
 
-    return this.encoder.hash(inputString, this.config.saltRounds);
+    return this._encoder.hash(inputString, this._config.saltRounds);
   }
 
   async verifyPassword(passwordProvided, hashedPassword) {
-    return this.encoder.compare(passwordProvided, hashedPassword);
+    return this._encoder.compare(passwordProvided, hashedPassword);
   }
 };

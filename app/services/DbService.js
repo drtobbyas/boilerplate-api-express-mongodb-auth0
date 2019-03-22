@@ -2,19 +2,16 @@
  * Database Service/Wrapper
  */
 
-const MainService = require('./MainService');
 const dbServiceProvider = require('mongoose');
 
-module.exports = class DbService extends MainService {
+module.exports = class DbService {
   constructor(options) {
-    super('DB Service');
-    const self = this;
-    self._dbProvider = dbServiceProvider;
-    self._dbProvider.Promise = global.Promise;
-    self._options = options;
-    self.connection = false;
+    this._dbProvider = dbServiceProvider;
+    this._dbProvider.Promise = global.Promise;
+    this._options = options;
+    this.connection = false;
 
-    if (!(self._options && self._options.connectionString)) {
+    if (!(this._options && this._options.connectionString)) {
       super.throwError('database connection string is not provided');
     }
   }

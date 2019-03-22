@@ -1,10 +1,8 @@
-const MainService = require('./MainService');
 const nodemailer = require('nodemailer');
 const config = require('../../config/app');
 
-module.exports = class MailService extends MainService {
+module.exports = class MailService {
   constructor({ from = [], to = [], cc = [], bcc = [], subject = '', bodyText = '', bodyHtml = '' }) {
-    super('Mail Service');
     
     this._serviceProvider = nodemailer;
     this._mailOptions = {

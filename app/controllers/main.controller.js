@@ -1,4 +1,5 @@
-const { ResponseService, ServerService } = require(`${basePath}/app/services`);
+const serviceContainerManager = require('../utils/serviceContainerManager');
+const { ServerService, ResponseService } = serviceContainerManager.load(['ServerService', 'ResponseService']);
 
 module.exports = {
   main(req, res, next) {

@@ -1,104 +1,106 @@
-const MainService = require('./MainService');
 const DbService = require('./DbService');
 
-const DEFAULT_SKIP = 0;
-const DEFAULT_LIMIT = 20;
-const MAX_LIM = 100;
-
-module.exports = class DbModelService extends MainService {
-
-
-  static aggregate(modelName, pipeline) {
-    return DbService.models(modelName).aggregate(pipeline);
-  }
-
-  static createOne(modelName, data) {
-    const ModelConstructor = DbService.models(modelName);
-    const newItem = new ModelConstructor(data);
-    return newItem.save();
-  }
-
-  static findOne(modelName, { query = {}, options = {} }) {
+module.exports = class DbModelService {
+  constructor(modelName) {
     if (!modelName) {
       throw new ReferenceError('model name is not provided');
     }
-    const requestOptions = getRequestOptions(options);
 
-    return DbService.models(modelName)
+    this._DbProvider = DbService;
+    this._model = this._getRepository(modelName);
+    this._modelName = modelName;
+    this._CONSTANTS = {
+      DEFAULT_SKIP: 0,
+      DEFAULT_LIMIT: 20,
+      MAX_LIM: 100,
+    };
+  }
+
+  _getRepository(modelName) {
+    return this._DbProvider.models(modelName);
+  }
+
+  _mapQueryOptions(options) {
+    return {
+      lean: !!(options && options.lean),
+      select: options.select || '',
+      skip: options.skip || this._CONSTANTS.DEFAULT_SKIP,
+      limit: (options.limit && options.limit <= this._CONSTANTS.MAX_LIM) ? options.limit : this._CONSTANTS.DEFAULT_LIMIT,
+      populate: options.populate || '',
+      sort: options.sort || 'desc',
+    };
+  }
+
+  aggregate(pipeline) {
+    return this._getRepository(this._modelName).aggregate(pipeline);
+  }
+
+  createOne(data) {
+    return new this._model(data).save();
+  }
+
+  getOne({ query = {}, options = {} }) {
+    const queryOptions = this._mapQueryOptions(options);
+
+    return this._model
       .findOne(query)
-      .populate(requestOptions.populate)
-      .select(requestOptions.select)
-      .lean(requestOptions.lean);
+      .populate(queryOptions.populate)
+      .select(queryOptions.select)
+      .lean(queryOptions.lean);
   }
 
-  static findAll(modelName, { query = {}, options = {} }) {
+  getById(id, options = {}) {
+    if (!id) {
+      throw new ReferenceError('id is not provided');
+    }
 
-    const requestOptions = getRequestOptions(options);
+    const queryOptions = this._mapQueryOptions(options);
 
-    return DbService.models(modelName)
+    return this._model.findById(id).populate(queryOptions.populate).select(queryOptions.select).lean(queryOptions.lean);
+  }
+
+  getMany({ query = {}, options = {} }) {
+
+    const queryOptions = this._mapQueryOptions(options);
+
+    return this._model
       .find(query)
-      .sort(requestOptions.sort)
-      .limit(Number(requestOptions.limit))
-      .skip(Number(requestOptions.skip))
-      .populate(requestOptions.populate)
-      .select(requestOptions.select)
-      .lean(requestOptions.lean);
+      .sort(queryOptions.sort)
+      .limit(Number(queryOptions.limit))
+      .skip(Number(queryOptions.skip))
+      .populate(queryOptions.populate)
+      .select(queryOptions.select)
+      .lean(queryOptions.lean);
   }
 
-  static findById(modelName, id, options) {
-    if (!modelName) {
-      throw new ReferenceError('model name is not provided');
-    }
+  updateOne(updateData, { query = {}, options = {} }) {
+    const mappedOptions = { ...options, new: true };
+    return this._model.findOneAndUpdate(query, updateData, mappedOptions);
+  }
 
+  updateById(id, updateData, options) {
     if (!id) {
-      throw new ReferenceError(`${modelName} id is not provided`);
+      throw new ReferenceError('id is not provided');
     }
 
-    const requestOptions = getRequestOptions(options);
+    const mappedOptions = { ...options, new: true };
 
-    return DbService.models(modelName).findById(id).populate(requestOptions.populate).select(requestOptions.select).lean(requestOptions.lean);
+    return this._model.findOneAndUpdate({ _id: id }, updateData, mappedOptions);
   }
 
-  static updateById(modelName, id, updateData, options) {
-    return update(modelName, updateData, { options, query: { _id: id } });
+  upsert({ query, data }) {
+    return this._model.findOneAndUpdate(query, data, { upsert: true, new: true });
   }
 
-  static update(modelName, updateData, { query = {}, options = {} }) {
-    return update(modelName, updateData, { options, query });
-  }
-
-  static deleteById(modelName, id) {
-    if (!modelName) {
-      throw new ReferenceError('model name is not provided');
-    }
-
+  removeById(id) {
     if (!id) {
-      throw new ReferenceError(`${modelName} id is not provided`);
+      throw new ReferenceError('id is not provided');
     }
 
-    return DbService.models(modelName).remove({ _id: id });
+    return this._model.remove({ _id: id });
   }
 
-  static delete(modelName, query) {
-    if (!modelName) {
-      throw new ReferenceError('model name is not provided');
-    }
-    return DbService.models(modelName).remove(query);
+  remove(query) {
+    return this._model.remove(query);
   }
-};
-
-const getRequestOptions = (options) => {
-  return {
-    lean: !!(options && options.lean),
-    select: options.select || '',
-    skip: options.skip || DEFAULT_SKIP,
-    limit: (options.limit && options.limit <= MAX_LIM) ? options.limit : DEFAULT_LIMIT,
-    populate: options.populate || '',
-    sort: options.sort || '',
-  };
-};
-
-const update = (model, updateData, { query = {}, options = {} }) => {
-  const mappedOptions = Object.assign(options, { new: true });
-  return DbService.models(model).findOneAndUpdate(query, updateData, mappedOptions);
 };

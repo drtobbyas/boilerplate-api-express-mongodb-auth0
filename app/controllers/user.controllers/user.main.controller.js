@@ -1,4 +1,6 @@
-const { EntityLoaderService, ResponseService, UserService } = require(`${basePath}/app/services`);
+
+const serviceContainerManager = require('../../utils/serviceContainerManager');
+const { userService, ResponseService, EntityLoaderService } = serviceContainerManager.load(['userService', 'ResponseService', 'EntityLoaderService']);
 
 module.exports = {
 
@@ -9,7 +11,7 @@ module.exports = {
      * Auth0 User Data taken from token
      */
       const remoteUserData = req.user;
-      const userSynced = await UserService.syncOne(remoteUserData);
+      const userSynced = await userService.syncOne(remoteUserData);
 
       return ResponseService.sendSuccessResponse(res, userSynced);
     } catch (err) {
@@ -22,7 +24,7 @@ module.exports = {
       const currentUserId = req.user._id;
       const updateData = req.body;
 
-      const updatedUser = await UserService.updateOne(currentUserId, updateData);
+      const updatedUser = await userService.updateById(currentUserId, updateData);
       ResponseService.sendSuccessResponse(res, updatedUser);
     } catch (err) {
       return next(err);
@@ -60,7 +62,7 @@ module.exports = {
   async deleteOne(req, res, next) {
     try {
       const currentUser = req.user;
-      await UserService.deleteUser(currentUser);
+      await userService.deleteUser(currentUser);
       ResponseService.sendSuccessResponse(res, true);
     } catch (err) {
       return next(err);
