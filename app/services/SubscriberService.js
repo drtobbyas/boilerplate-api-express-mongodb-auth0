@@ -1,20 +1,19 @@
-const DbService = require(`${basePath}/app/services/DbService`);
-const MODEL_NAME = 'Subscriber';
+const DbModelService = require('./DbModelService');
 
-module.exports = {
-  async create({ email }) {
-    const Model = DbService.models(MODEL_NAME);
-    const foundSubscriber = await Model.findOne({ email }).select('email').lean();
+module.exports = class SubscriberService extends DbModelService {
+  constructor() {
+    super('Subscriber');
+  }
+
+  async createOne({ email }) {
+    const foundSubscriber = await this.getOne({ query: { email } });
 
     if (foundSubscriber && Object.keys(foundSubscriber) && Object.keys(foundSubscriber).length) {
       return foundSubscriber;
     }
-    
-    const newItem = new Model({ email });
-    return newItem.save();
-  },
 
-  getAll() {
-    // do something
-  },
+    const newItem = new this._model({ email });
+    
+    return newItem.save();
+  }
 };

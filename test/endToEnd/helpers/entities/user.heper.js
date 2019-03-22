@@ -1,10 +1,11 @@
-const { UserService } = require('../../../../app/services');
 const faker = require('faker');
+const serviceContainerManager = require('../../../../app/utils/serviceContainerManager');
+const { userService } = serviceContainerManager.load(['userService']);
 
 module.exports = {
   createOne() {
     const newUserData = getNewUserData();
-    return UserService.createOne(newUserData);
+    return userService.createOne(newUserData);
   },
 };
 
