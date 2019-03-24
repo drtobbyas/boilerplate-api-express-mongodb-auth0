@@ -33,7 +33,7 @@ serviceContainerManager.register([
   { name: 'authService', provider: AuthService },
   { name: 'cryptoService', provider: new CryptoService() },
   { name: 'dbService', provider: new DbService(({ connectionString: appConfig.db.connectionString })) },
-  { name: 'entityLoaderService', provider: EntityLoaderService },
+  { name: 'EntityLoaderService', provider: EntityLoaderService },
   { name: 'FileUploadService', provider: FileUploadService },
   { name: 'loggingService', provider: new LoggingService() },
   { name: 'ServerService', provider: ServerService },
