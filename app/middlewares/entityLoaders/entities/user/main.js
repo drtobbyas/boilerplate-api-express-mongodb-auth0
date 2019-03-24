@@ -1,5 +1,6 @@
+const serviceContainerManager = require('../../../../utils/serviceContainerManager');
+const { userService } = serviceContainerManager.load(['userService']);
 const MainLoader = require('../../main');
-const { UserService } = require(`${basePath}/app/services/`);
 const { NotFound } = require(`${basePath}/app/utils/apiErrors`);
 const mainHelper = require(`${basePath}/app/helpers`);
 
@@ -8,7 +9,7 @@ module.exports = {
   async updateOne(req, res, next) {
 
     try {
-      const userFound = await UserService.findById(req.params.userId);
+      const userFound = await userService.getById(req.params.userId);
 
       if (!mainHelper.isObjectValid(userFound)) {
         throw new NotFound('user not found');
@@ -25,7 +26,7 @@ module.exports = {
 
   async getOne(req, res, next) {
     try {
-      const userFound = await UserService.findById(req.params.userId);
+      const userFound = await userService.getById(req.params.userId);
       if (!mainHelper.isObjectValid(userFound)) {
         throw new NotFound('user not found');
       }
@@ -46,7 +47,7 @@ module.exports = {
   async getAll(req, res, next) {
 
     try {
-      const usersFound = await UserService.findAll({ query: { _id: { $ne: req.user.id } }, options: { lean: true } });
+      const usersFound = await userService.getMany({ query: { _id: { $ne: req.user.id } }, options: { lean: true } });
       MainLoader.setEntities(req, { users: usersFound });
       return next();
 
@@ -58,7 +59,7 @@ module.exports = {
   async deleteOne(req, res, next) {
 
     try {
-      const userFound = await UserService.findOne({ query: { _id: req.params.userId }, options: { select: '_id' } });
+      const userFound = await userService.getOne({ query: { _id: req.params.userId }, options: { select: '_id' } });
 
       if (!mainHelper.isObjectValid(userFound)) {
         throw new NotFound('user not found');

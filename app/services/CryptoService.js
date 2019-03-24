@@ -13,12 +13,15 @@ module.exports = class Crypto {
   }
 
   getRandomString(bytes) {
+    if (!bytes) {
+      throw new TypeError('valid number of bytes should be provided');
+    }
     return this._crypto.randomBytes(bytes).toString('hex');
   }
 
   async encode(inputString) {
     if (!inputString) {
-      throw ((`${this.name}: string to encode is not provided`).toString());
+      throw new TypeError('String to encode is not provided');
     }
 
     return this._encoder.hash(inputString, this._config.saltRounds);

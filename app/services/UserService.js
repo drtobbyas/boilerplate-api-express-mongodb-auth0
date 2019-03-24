@@ -1,10 +1,10 @@
 const DbModelService = require('./DbModelService');
 
 module.exports = class UserService extends DbModelService {
-  constructor({ AuthService, cryptoService }) {
+  constructor({ authService, cryptoService }) {
     super('User');
     this._encodingService = cryptoService;
-    this._AuthService = AuthService;
+    this._authService = authService;
   }
 
   async createOne({ ...userData }) {
@@ -67,7 +67,7 @@ module.exports = class UserService extends DbModelService {
     const removeRemoteUserList = [];
 
     remoteIdList.forEach((singleItem) => {
-      removeRemoteUserList.push(this._AuthService.deleteUserByRemoteId(singleItem));
+      removeRemoteUserList.push(this._authService.deleteUserById(singleItem));
     });
 
     return Promise.all([

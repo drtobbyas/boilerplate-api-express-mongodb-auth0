@@ -2,9 +2,8 @@ const jwt = require('express-jwt');
 const jwks = require('jwks-rsa');
 const { Forbidden, NotAuthorized } = require(`${basePath}/app/utils/apiErrors`);
 const config = require(`${basePath}/config/app`);
-
 const serviceContainerManager = require('../../../../utils/serviceContainerManager');
-const { userService, AuthService } = serviceContainerManager.load(['userService', 'AuthService']);
+const { userService } = serviceContainerManager.load(['userService']);
 
 const userRoles = userService.getRoles();
 
@@ -13,16 +12,6 @@ module.exports = {
   /**
    * auth middleware method to authenticate via token
    */
-
-  async isAuthenticated(req, res, next) {
-
-    try {
-      await AuthService.verifyAccessToken(req);
-      return next();
-    } catch (err) {
-      return next(err);
-    }
-  },
 
   async loadUser(req, res, next) {
     try {
