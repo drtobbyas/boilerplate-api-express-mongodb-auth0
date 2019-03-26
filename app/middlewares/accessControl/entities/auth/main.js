@@ -1,9 +1,6 @@
-const jwt = require('express-jwt');
-const jwks = require('jwks-rsa');
 const { Forbidden, NotAuthorized } = require(`${basePath}/app/utils/apiErrors`);
-const config = require(`${basePath}/config/app`);
 const serviceContainerManager = require('../../../../utils/serviceContainerManager');
-const { userService } = serviceContainerManager.load(['userService']);
+const { userService, authService } = serviceContainerManager.load(['userService', 'authService']);
 
 const userRoles = userService.getRoles();
 
@@ -24,7 +21,7 @@ module.exports = {
   },
 
   async validateToken(req, res, next) {
-    return jwtCheck(req, res, next);
+    return authService.validateToken()(req, res, next);
   },
 
   async isAdmin(req, res, next) {
@@ -45,18 +42,6 @@ const loadUser = async (remoteId) => {
 };
 
 const setRequestUser = (req, userData) => {
-  req.user = Object.assign({}, userData);
+  req.user = { ...userData };
   return req.user;
 };
-
-const jwtCheck = jwt({
-  secret: jwks.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-    jwksUri: config.auth.authProvider.tokenSecretUri,
-  }),
-  aud: config.auth.authProvider.audience,
-  iss: config.auth.authProvider.issuer,
-  algorithms: ['RS256'],
-});

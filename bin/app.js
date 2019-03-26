@@ -29,16 +29,18 @@ const appConfig = require(`${basePath}/config/app`);
  * Create initial service instances
  */
 
+const authService = new AuthService(appConfig.auth.authProvider);
+
 serviceContainerManager.register([
-  { name: 'authService', provider: AuthService },
-  { name: 'cryptoService', provider: new CryptoService() },
+  { name: 'authService', provider: authService },
+  // { name: 'cryptoService', provider: new CryptoService() },
   { name: 'dbService', provider: new DbService(({ connectionString: appConfig.db.connectionString })) },
   { name: 'EntityLoaderService', provider: EntityLoaderService },
   { name: 'FileUploadService', provider: FileUploadService },
   { name: 'loggingService', provider: new LoggingService() },
   { name: 'ServerService', provider: ServerService },
   { name: 'subscriberService', provider: new SubscriberService() },
-  { name: 'userService', provider: new UserService({ AuthService, cryptoService: new CryptoService() }) },
+  { name: 'userService', provider: new UserService({ authService, cryptoService: new CryptoService() }) },
   { name: 'ResponseService', provider: ResponseService },
 ]);
 
